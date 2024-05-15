@@ -6,6 +6,7 @@ const del = document.querySelector("input[type='button'][class='delete special']
 const erase = document.querySelector("input[type='button'][class='erase special']");
 const equal = document.querySelector("input[type='button'][class='equal special']");
 const comma = document.querySelector("input[type='button'][class='comma']");
+const negative = document.querySelector("input[type='button'][class='negative']");
 
 
 let currentInput = []; 
@@ -33,7 +34,7 @@ function power(a, b) {
     return parseFloat(a) ** parseFloat(b)
 }
 
-function showInputs() {
+function DisplayInputs() {
     let outputToShow = currentInput.join("");
     return currentInput.length === 0 ? outputValue.textContent = "0" : 
                                     outputValue.textContent = `${outputToShow}`
@@ -42,14 +43,14 @@ function showInputs() {
 
 function clearOutput(){
     currentInput = [];
-    oldInput = [];
+    oldInput = [0];
     operatorSelected = "";
-    showInputs();
+    DisplayInputs();
 }
 
 function deleteOutput(){
     currentInput.pop();
-    showInputs();
+    DisplayInputs();
 }
 
 function assignOperator(operator) {
@@ -80,14 +81,24 @@ function operate(firstValue, operator, secondeValue) {
     }
 }
 
+function toNegative() {
+    currentInput.includes("-") ? currentInput.shift() : currentInput.unshift("-");
+    DisplayInputs();
+}
 
+function operateAndDisplay(firstValue, operator, secondValue) {
+    currentInput = Array.from(String(operate(firstValue, operator, secondValue)), (number) => number);
+    DisplayInputs();
+    oldInput = currentInput;
+    currentInput = []; 
+}
 
 /* Code */
 numbers.forEach(number => number.addEventListener("click", event => {
     if (currentInput.length < 20) {
         currentInput.push(event.target.value);
     }
-    showInputs();
+    DisplayInputs();
 }
 ));
 
@@ -97,15 +108,10 @@ operators.forEach(operator => operator.addEventListener("click", event => {
     } 
     
     if (currentInput.length === 0) {
-        currentInput = Array.from(String(operate(oldInput, operatorSelected, [0])), (number) => number);
-        showInputs();
-        oldInput = currentInput;
-        currentInput = []; 
+        currentInput = [0]
+        operateAndDisplay(oldInput, operatorSelected, currentInput);
     } else {
-        currentInput = Array.from(String(operate(oldInput, operatorSelected, currentInput)), (number) => number);
-        showInputs();
-        oldInput = currentInput;
-        currentInput = []; 
+        operateAndDisplay(oldInput, operatorSelected, currentInput);
     }   
     operatorSelected = event.target.value;
     /* urrentInput = Array.from(String(operate(oldInput, operatorSelected, currentInput)), (number) => number); */
@@ -117,16 +123,16 @@ del.addEventListener("click", deleteOutput);
 comma.addEventListener("click", event => {
     if (!currentInput.includes(".")) {
         currentInput.push(event.target.value);
-        showInputs();
+        DisplayInputs();
     }
 })
 
 equal.addEventListener("click", event => {
-    currentInput = currentInput = Array.from(String(operate(oldInput, operatorSelected, currentInput)), (number) => number);
-    showInputs();
-    oldInput = currentInput;
-    currentInput = [];
+    currentInput.length !== 0 && operatorSelected !== "" ? operateAndDisplay(oldInput, operatorSelected, currentInput) : 
+    operateAndDisplay(oldInput, "+", [0]);
 })
+
+negative.addEventListener("click", toNegative);
 
 /* For debugging */ 
 
