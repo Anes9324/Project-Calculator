@@ -1,5 +1,5 @@
 /* Variable declarations */
-const outputValue = document.querySelector("#output-value")
+const inputsSection = document.querySelector("#output-value")
 const numbers = document.querySelectorAll("input[type='button'][class='number']");
 const operators = document.querySelectorAll("input[type='button'][class='operator']");
 const del = document.querySelector("input[type='button'][class='delete special']");
@@ -8,56 +8,51 @@ const equal = document.querySelector("input[type='button'][class='equal special'
 const comma = document.querySelector("input[type='button'][class='comma']");
 const negative = document.querySelector("input[type='button'][class='negative']");
 
-
+//let a = ["1","3"] 
 let currentInput = []; 
-let [oldInput, operatorSelected] = [[0], ""];
+let totalInputs = [];
+let activeOperator = "";
+
 
 
 /* Functions  */
 function add(a, b) {
-    return parseFloat(a) + parseFloat(b)
+    // a & b are strings 
+    let round = roundFloats(a, b); //give 10 ** number of decimals to round to. 
+    return Array.from(
+        String(
+        Math.round((parseFloat(a) + parseFloat(b)) * round) / round) // To return an array, transform float to string (String method) //Math.round((Calculations * round)/round) is to round floats.
+    )
 }
 
 function subtract(a, b) {
-    return parseFloat(a) - parseFloat(b)
+    let round = roundFloats(a, b);
+    return Array.from(
+        String(
+        Math.round((parseFloat(a) - parseFloat(b))* round) / round)
+    )
 }
 
 function multiply(a, b) {
-    return parseFloat(a) * parseFloat(b)
+    let round = roundFloats(a, b);
+    return Array.from(
+        String(
+        Math.round((parseFloat(a) * parseFloat(b)) * round) / round)
+    )
 }
 
 function divide(a, b) {
-    return parseFloat(b) !== 0 ? parseFloat(a) / parseFloat(b) : "Good try !"
+    let round = roundFloats(a, b);
+    return parseFloat(b) !== 0 ? 
+    Array.from(String(Math.round((parseFloat(a) / parseFloat(b)) * round) / round)) : Array.from("Good try !")
 }
 
 function power(a, b) {
-    return parseFloat(a) ** parseFloat(b)
+    return Array.from(
+        String(parseFloat(a) ** parseFloat(b)))
 }
 
-function DisplayInputs() {
-    let outputToShow = currentInput.join("");
-    return currentInput.length === 0 ? outputValue.textContent = "0" : 
-                                    outputValue.textContent = `${outputToShow}`
-}
-
-
-function clearOutput(){
-    currentInput = [];
-    oldInput = [0];
-    operatorSelected = "";
-    DisplayInputs();
-}
-
-function deleteOutput(){
-    currentInput.pop();
-    DisplayInputs();
-}
-
-function assignOperator(operator) {
-    operatorSelected = operator;
-}
-
-function operate(firstValue, operator, secondeValue) {
+function operations(firstValue, operator, secondeValue) {
     firstValue = firstValue.join("");
     secondeValue = secondeValue.join("");
     switch(operator) {
@@ -81,16 +76,74 @@ function operate(firstValue, operator, secondeValue) {
     }
 }
 
-function toNegative() {
-    currentInput.includes("-") ? currentInput.shift() : currentInput.unshift("-");
-    DisplayInputs();
+function operate(firstValue, operator, secondValue) {
+
+    if (totalInputs.length === 0) {
+        totalInputs = currentInput;
+        currentInput = []; 
+    } else if (activeOperator === "" || currentInput.length === 0) {
+        return
+    } else {
+        totalInputs = operations(firstValue, operator, secondValue);
+        currentInput = [];
+    }
 }
 
-function operateAndDisplay(firstValue, operator, secondValue) {
-    currentInput = Array.from(String(operate(firstValue, operator, secondValue)), (number) => number);
-    DisplayInputs();
-    oldInput = currentInput;
-    currentInput = []; 
+function updateDisplay(inputsToDisplay) {
+    let inputsToString = inputsToDisplay.join("");
+    inputsToDisplay.length === 0 ? inputsSection.textContent = "0" : 
+                                    inputsSection.textContent = `${inputsToString}`;
+}
+
+function verifyDisplayErrors() {
+    if (!isNumber(totalInputs)) {
+        currentInput = []; 
+        totalInputs = [];
+        activeOperator = "";
+    }
+}
+
+function isNumber(arr) {
+    let arrToString = arr.join(""); 
+    return !isNaN(parseFloat(arrToString)) //return false if conversion of arr to number fails, else true.  
+}
+
+function clearDisplay(){
+    currentInput = [];
+    totalInputs = [];
+    activeOperator = "";
+    updateDisplay(currentInput);
+}
+
+function deleteInput(){
+    currentInput.pop();
+    updateDisplay(currentInput);
+}
+
+
+function toNegative() {
+    currentInput.includes("-") ? currentInput.shift() : currentInput.unshift("-");
+    updateDisplay(currentInput);
+}
+
+function roundFloats(a, b) {
+    let numberOfFloatsA = 0;
+    let numberOfFloatsB = 0;
+    let max = 0;
+    
+    if (a.includes(".")) {
+        numberOfFloatsA = a.slice(a.indexOf(".")+1)
+                        .length;
+        max = numberOfFloatsA >= numberOfFloatsB ? numberOfFloatsA : numberOfFloatsB;
+    }
+
+    if (b.includes(".")){
+        numberOfFloatsB = b.slice(b.indexOf(".")+1)
+                        .length;
+        max = numberOfFloatsB >= numberOfFloatsA ? numberOfFloatsB : numberOfFloatsA;
+    }
+    
+    return (10 ** max) // 10 ** number of max decimals in a and b.  
 }
 
 /* Code */
@@ -98,38 +151,31 @@ numbers.forEach(number => number.addEventListener("click", event => {
     if (currentInput.length < 20) {
         currentInput.push(event.target.value);
     }
-    DisplayInputs();
+    updateDisplay(currentInput);
 }
 ));
 
 operators.forEach(operator => operator.addEventListener("click", event => {
-    if (operatorSelected.length === 0) { 
-        operatorSelected = event.target.value
-    } 
-    
-    if (currentInput.length === 0) {
-        currentInput = [0]
-        operateAndDisplay(oldInput, operatorSelected, currentInput);
-    } else {
-        operateAndDisplay(oldInput, operatorSelected, currentInput);
-    }   
-    operatorSelected = event.target.value;
-    /* urrentInput = Array.from(String(operate(oldInput, operatorSelected, currentInput)), (number) => number); */
 
+    operate(totalInputs, activeOperator, currentInput);
+    activeOperator = event.target.value;
+    updateDisplay(totalInputs);
+    verifyDisplayErrors();        
 }))
 
-erase.addEventListener("click", clearOutput);
-del.addEventListener("click", deleteOutput);
+erase.addEventListener("click", clearDisplay);
+del.addEventListener("click", deleteInput);
 comma.addEventListener("click", event => {
     if (!currentInput.includes(".")) {
         currentInput.push(event.target.value);
-        DisplayInputs();
+        updateDisplay(currentInput);
     }
 })
 
 equal.addEventListener("click", event => {
-    currentInput.length !== 0 && operatorSelected !== "" ? operateAndDisplay(oldInput, operatorSelected, currentInput) : 
-    operateAndDisplay(oldInput, "+", [0]);
+    operate(totalInputs, activeOperator, currentInput);
+    updateDisplay(totalInputs);
+    verifyDisplayErrors(); 
 })
 
 negative.addEventListener("click", toNegative);
@@ -140,7 +186,7 @@ const allKeys = document.querySelectorAll("input");
 
 allKeys.forEach(key => key.addEventListener("click", event => {
     console.log("current Input :", currentInput.join(""));
-    console.log("last Input : ", oldInput.join(""));
-    console.log("Operator selected :", operatorSelected);
+    console.log("last Input : ", totalInputs.join(""));
+    console.log("Operator selected :", activeOperator);
 }))
 
