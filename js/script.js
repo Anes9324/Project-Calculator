@@ -180,13 +180,4 @@ equal.addEventListener("click", event => {
 
 negative.addEventListener("click", toNegative);
 
-/* For debugging */ 
-
-const allKeys = document.querySelectorAll("input");
-
-allKeys.forEach(key => key.addEventListener("click", event => {
-    console.log("current Input :", currentInput.join(""));
-    console.log("last Input : ", totalInputs.join(""));
-    console.log("Operator selected :", activeOperator);
-}))
 
