@@ -180,4 +180,18 @@ equal.addEventListener("click", event => {
 
 negative.addEventListener("click", toNegative);
 
-
+document.addEventListener("keyup", event => {
+    let autorasedNumbers = "0123456789";
+    let autorasedOperators = "-+*/"; 
+    if (autorasedNumbers.includes(event.key)) {
+        if (currentInput.length < 20) {
+            currentInput.push(event.key);
+        }
+        updateDisplay(currentInput);
+    } else if (autorasedOperators.includes(event.key)) {
+        operate(totalInputs, activeOperator, currentInput);
+        activeOperator = event.target.value;
+        updateDisplay(totalInputs);
+        verifyDisplayErrors();      
+    }
+})
