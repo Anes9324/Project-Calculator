@@ -55,6 +55,7 @@ function power(a, b) {
 function operations(firstValue, operator, secondeValue) {
     firstValue = firstValue.join("");
     secondeValue = secondeValue.join("");
+    //debugger;
     switch(operator) {
         case "+":
             return add(firstValue,secondeValue);
@@ -63,12 +64,13 @@ function operations(firstValue, operator, secondeValue) {
             return subtract(firstValue, secondeValue);
             break;
         case "x":
+        case "*" :
             return multiply(firstValue, secondeValue);
             break;
-        case "/": 
+        case "/":
             return divide(firstValue, secondeValue)
             break;
-        case "exp": 
+        case "exp(y)":
             return power(firstValue, secondeValue);
             break;
         default:
@@ -143,7 +145,35 @@ function roundFloats(a, b) {
         max = numberOfFloatsB >= numberOfFloatsA ? numberOfFloatsB : numberOfFloatsA;
     }
     
-    return (10 ** max) // 10 ** number of max decimals in a and b.  
+    return (max === 0 ? 10 : 10 ** max) // 10 ** number of max decimals in a and b. if no decimal return 10.
+}
+
+/* Handles number keys clicked or typed */
+function getOperatorHandler(event) { 
+    operate(totalInputs, activeOperator, currentInput);
+    
+    if (event.type === "click") {
+        activeOperator = event.target.value;
+    } else if (event.type = "keyup") {
+        activeOperator = event.key;
+    }
+
+    updateDisplay(totalInputs);
+    verifyDisplayErrors(); 
+}
+
+function getResultsHandler(){
+
+    operate(totalInputs, activeOperator, currentInput);
+    updateDisplay(totalInputs);
+    verifyDisplayErrors(); 
+}
+
+function getComma() {
+    if (!currentInput.includes(".")) {
+        currentInput.push(".");
+        updateDisplay(currentInput);
+}
 }
 
 /* Code */
@@ -153,45 +183,37 @@ numbers.forEach(number => number.addEventListener("click", event => {
     }
     updateDisplay(currentInput);
 }
+
 ));
 
-operators.forEach(operator => operator.addEventListener("click", event => {
-
-    operate(totalInputs, activeOperator, currentInput);
-    activeOperator = event.target.value;
-    updateDisplay(totalInputs);
-    verifyDisplayErrors();        
-}))
+operators.forEach(operator => operator.addEventListener("click", event => getOperatorHandler(event)));
 
 erase.addEventListener("click", clearDisplay);
 del.addEventListener("click", deleteInput);
 comma.addEventListener("click", event => {
-    if (!currentInput.includes(".")) {
-        currentInput.push(event.target.value);
-        updateDisplay(currentInput);
-    }
+    getComma();
 })
 
-equal.addEventListener("click", event => {
-    operate(totalInputs, activeOperator, currentInput);
-    updateDisplay(totalInputs);
-    verifyDisplayErrors(); 
-})
+equal.addEventListener("click", event => getResultsHandler());
 
 negative.addEventListener("click", toNegative);
 
-document.addEventListener("keyup", event => {
-    let autorasedNumbers = "0123456789";
-    let autorasedOperators = "-+*/"; 
-    if (autorasedNumbers.includes(event.key)) {
+document.addEventListener("keyup", event => { //Handles keyboard inputs
+    let numbers = "0123456789";
+    let operators = "-+*/";
+    let equal = "Enter";
+    let comma = ".";
+    
+    if (numbers.includes(event.key)) {
         if (currentInput.length < 20) {
             currentInput.push(event.key);
         }
         updateDisplay(currentInput);
-    } else if (autorasedOperators.includes(event.key)) {
-        operate(totalInputs, activeOperator, currentInput);
-        activeOperator = event.target.value;
-        updateDisplay(totalInputs);
-        verifyDisplayErrors();      
+    } else if (operators.includes(event.key)) {
+        getOperatorHandler(event);
+    } else if (event.key === equal) {
+        getResultsHandler();
+    } else if (event.key === comma) {
+        getComma();
     }
 })

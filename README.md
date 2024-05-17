@@ -7,3 +7,9 @@ Update [05/17/2024] :
 I reworked the code to modify it's logic to be more appropriate to the task, in fact it works like this : 
 
 <img src="./resources/program-logic.png" alt="Calculator logic">
+
+Added keyboard support, keys supported : 
+- [1-9] : input numbers 
+- [+-*/] : input operators 
+- [Enter] : to show results 
+- [.] : input comma
